@@ -1,41 +1,27 @@
 import cv2
 import object_socket
 
+# Creăm socket-ul de trimitere
+s = object_socket.ObjectSenderSocket('127.0.0.1', 5000, 
+                                     print_when_awaiting_receiver=True, 
+                                     print_when_sending_object=True)
 
-s = object_socket.ObjectReceiverSocket('127.0.0.1', 5000, print_when_connecting_to_sender=True, print_when_receiving_object=True)
+# Deschidem fișierul video
+video = cv2.VideoCapture('.\\data\\Venice_10.mp4')
 
 while True:
-    ret, frame = s.recv_object()
+    ret, frame = video.read()
+    
+    # Trimitem starea citirii (ret) și cadrul (frame)
+    s.send_object((ret, frame))
+
+    # Dacă clipul s-a terminat, oprim bucla
     if not ret:
         break
 
-    cv2.imshow('Frame', frame)
-
+    # Opțiune de oprire manuală cu 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-cv2.destroyAllWindows()
-
-# for i in range(5):
-#     a = s.recv()
-#
-#     print(f'\n--- {i} ---\n')
-#     print(a)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+video.release()
+s.close()
